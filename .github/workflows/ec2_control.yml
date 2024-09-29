@@ -1,0 +1,34 @@
+name: EC2 Control
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Ação a ser realizada (start ou stop)'
+        required: true
+        default: 'start'
+      instance_id:
+        description: 'ID da instância EC2'
+        required: true
+
+jobs:
+  control_ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'  # ou a versão que preferir
+
+      - name: Install boto3
+        run: pip install boto3
+
+      - name: Control EC2 instance
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'  # ou a região onde sua instância está
+        run: python scripts/ec2_control.py "${{ github.event.inputs.action }}" "${{ github.event.inputs.instance_id }}"
